@@ -22,7 +22,13 @@ $HOME/.maestro/bin/maestro test \
   -e F07_EXPORT_MARKER="export body" \
   --format junit \
   --output "$OUTPUT_XML" \
-  "$FLOWS_DIR"
+  "$FLOWS_DIR/01_new_note.yaml" \
+  "$FLOWS_DIR/02_undo_in_editor.yaml" \
+  "$FLOWS_DIR/03_edit_note.yaml" \
+  "$FLOWS_DIR/04_sort_list.yaml" \
+  "$FLOWS_DIR/05_delete_note.yaml" \
+  "$FLOWS_DIR/06_select_all_colorize.yaml" \
+  "$FLOWS_DIR/07_export_file.yaml"
 MAESTRO_EXIT=$?
 set -e
 
