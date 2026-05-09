@@ -1,0 +1,37 @@
+appId: com.atomczak.notepat
+env:
+  F01_NOTE_TITLE: ${F01_NOTE_TITLE || "Note Alpha"}
+  F03_NEW_TITLE: ${F03_NEW_TITLE || "Note Gamma"}
+  F03_NEW_BODY: ${F03_NEW_BODY || "body gamma"}
+---
+- stopApp
+- launchApp
+- runFlow: ../subflows/dismiss_common_interruptions.yaml
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- tapOn:
+    text: ${F01_NOTE_TITLE}
+- extendedWaitUntil:
+    visible:
+      id: action_save_note
+    timeout: 100
+- tapOn:
+    id: textNoteTitleEdit
+- eraseText
+- inputText: ${F03_NEW_TITLE}
+- tapOn:
+    id: textNoteContentEdit
+- eraseText
+- inputText: ${F03_NEW_BODY}
+- hideKeyboard
+- tapOn:
+    id: action_save_note
+- pressKey: Back
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- assertVisible: ${F03_NEW_TITLE}
+- assertNotVisible: ${F01_NOTE_TITLE}

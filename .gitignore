@@ -1,0 +1,22 @@
+# --- Local / personal (do not push) ---
+# VS Code / Cursor: machine paths, adb serial defaults, your username in paths
+.vscode/
+
+# JetBrains (if you open the repo in Android Studio / IntelliJ)
+.idea/
+
+# Secrets and local env (never commit)
+.env
+.env.*
+!.env.example
+
+# Maestro run output (your last run only; personal)
+reports/*
+!reports/README.md
+
+# Legacy path (old script layout); safe to ignore if folder exists
+reports/runs/
+
+# OS junk
+Thumbs.db
+.DS_Store

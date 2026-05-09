@@ -1,0 +1,20 @@
+# collect-report.ps1 passes these as maestro -e (overrides flow defaults).
+# Maestro Studio: same strings are defaults in each flow env: ... || "..." — keep in sync when you change values here.
+
+# 01 — first note
+F01_NOTE_TITLE: Note Alpha
+F01_NOTE_BODY: body alpha
+
+# 02 — second note + undo on body (full line then delete last word with Backspace)
+F02_NOTE_TITLE: Note Beta
+F02_UNDO_FULL: Hello World
+
+# 03 — edit first note (open by title from 01)
+F03_NEW_TITLE: Note Gamma
+F03_NEW_BODY: body gamma
+
+# 06 — tap position for Colorize palette (percent of screen width,height)
+F06_COLOR_SWATCH: "48%,52%"
+
+# 07 — export body marker
+F07_EXPORT_MARKER: export body

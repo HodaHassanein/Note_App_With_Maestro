@@ -1,0 +1,24 @@
+appId: com.atomczak.notepat
+env:
+  F06_COLOR_SWATCH: ${F06_COLOR_SWATCH || "48%,52%"}
+---
+- stopApp
+- launchApp
+- runFlow: ../subflows/dismiss_common_interruptions.yaml
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- tapOn: "More options"
+- tapOn: ".*Select all notes.*"
+- tapOn: "More options"
+- tapOn: "Colorize"
+- tapOn:
+    point: ${F06_COLOR_SWATCH}
+- tapOn:
+    text: "OK"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100

@@ -1,0 +1,4 @@
+# Use when cwd is the maestro/ folder (CLI). Studio: use repo root config.yaml
+appId: com.atomczak.notepat
+flows:
+  - flows/*

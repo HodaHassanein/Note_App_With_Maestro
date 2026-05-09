@@ -1,0 +1,13 @@
+# Workspace root: open this folder (Note) in Maestro Studio + Cursor.
+# Flow discovery + default env (Studio may still need you to create an Environment once and paste keys from maestro/STUDIO_ENV.txt — Maestro stores Studio env in the app, not always in this file).
+appId: com.atomczak.notepat
+flows:
+  - maestro/flows/*
+env:
+  F01_NOTE_TITLE: Note Alpha
+  F01_NOTE_BODY: body alpha
+  F02_NOTE_TITLE: Note Beta
+  F02_UNDO_FULL: Hello World
+  F03_NEW_TITLE: Note Gamma
+  F03_NEW_BODY: body gamma
+  F07_EXPORT_MARKER: export body

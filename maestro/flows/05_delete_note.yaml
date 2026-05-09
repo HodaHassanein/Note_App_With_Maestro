@@ -1,0 +1,29 @@
+appId: com.atomczak.notepat
+env:
+  F02_NOTE_TITLE: ${F02_NOTE_TITLE || "Note Beta"}
+---
+- stopApp
+- launchApp
+- runFlow: ../subflows/dismiss_common_interruptions.yaml
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- longPressOn:
+    text: ${F02_NOTE_TITLE}
+- tapOn:
+    text: "Delete"
+- extendedWaitUntil:
+    visible: "Delete the selected notes?"
+    timeout: 100
+- tapOn: "OK"
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- assertNotVisible: ${F02_NOTE_TITLE}
+- tapOn:
+    text: "Open navigation drawer"
+- tapOn:
+    text: "Trash"
+- assertVisible: ${F02_NOTE_TITLE}

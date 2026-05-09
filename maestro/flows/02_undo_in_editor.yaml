@@ -1,0 +1,35 @@
+appId: com.atomczak.notepat
+env:
+  F02_NOTE_TITLE: ${F02_NOTE_TITLE || "Note Beta"}
+  F02_UNDO_FULL: ${F02_UNDO_FULL || "Hello World"}
+---
+- stopApp
+- launchApp
+- runFlow: ../subflows/dismiss_common_interruptions.yaml
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- tapOn:
+    id: new_note_fab
+- extendedWaitUntil:
+    visible:
+      id: action_save_note
+    timeout: 100
+- tapOn:
+    id: textNoteTitleEdit
+- inputText: ${F02_NOTE_TITLE}
+- tapOn:
+    id: textNoteContentEdit
+- inputText: ${F02_UNDO_FULL}
+- pressKey: Backspace
+- tapOn: ".*UNDO.*"
+- assertVisible: ".*World.*"
+- hideKeyboard
+- tapOn:
+    id: action_save_note
+- pressKey: Back
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100

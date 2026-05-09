@@ -1,0 +1,27 @@
+appId: com.atomczak.notepat
+---
+- stopApp
+- launchApp
+- runFlow: ../subflows/dismiss_common_interruptions.yaml
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- tapOn: "SORT"
+- extendedWaitUntil:
+    visible: "Sort by"
+    timeout: 100
+- tapOn: "title: A to Z"
+- tapOn: "SORT"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- assertNotVisible: "Sort by"
+- extendedWaitUntil:
+    visible: "Note Gamma"
+    timeout: 3000
+- extendedWaitUntil:
+    visible: "Note Beta"
+    timeout: 3000

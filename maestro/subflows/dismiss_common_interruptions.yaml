@@ -1,0 +1,21 @@
+appId: com.atomczak.notepat
+---
+# Best-effort taps; each step is ignored if the control is not on screen.
+- tapOn:
+    text: "Allow"
+    optional: true
+- tapOn:
+    text: "While using the app"
+    optional: true
+- tapOn:
+    text: "Only this time"
+    optional: true
+- tapOn:
+    text: "Got it"
+    optional: true
+- tapOn:
+    text: "OK"
+    optional: true
+- tapOn:
+    text: "Dismiss"
+    optional: true

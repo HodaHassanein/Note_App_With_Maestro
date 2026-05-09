@@ -1,0 +1,40 @@
+appId: com.atomczak.notepat
+env:
+  F07_EXPORT_MARKER: ${F07_EXPORT_MARKER || "export body"}
+---
+- stopApp
+- launchApp
+- runFlow: ../subflows/dismiss_common_interruptions.yaml
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- tapOn:
+    id: new_note_fab
+- extendedWaitUntil:
+    visible:
+      id: action_save_note
+    timeout: 100
+- tapOn:
+    id: textNoteTitleEdit
+- inputText: "Export note"
+- tapOn:
+    id: textNoteContentEdit
+- inputText: ${F07_EXPORT_MARKER}
+- hideKeyboard
+- tapOn:
+    id: action_save_note
+- pressKey: Back
+- extendedWaitUntil:
+    visible:
+      id: new_note_fab
+    timeout: 100
+- longPressOn:
+    text: "Export note"
+- tapOn: "More options"
+- tapOn: "Export notes to text files"
+- tapOn:
+    text: "SAVE"
+    optional: true
+- pressKey: Back
+
