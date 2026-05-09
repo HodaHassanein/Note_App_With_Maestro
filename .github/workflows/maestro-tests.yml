@@ -45,8 +45,9 @@ jobs:
           api-level: 34
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -memory 2048
           disable-animations: true
+          emulator-boot-timeout: 300
           script: echo "AVD created"
 
       - name: Run Maestro tests
@@ -55,8 +56,9 @@ jobs:
           api-level: 34
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -memory 2048
           disable-animations: true
+          emulator-boot-timeout: 300
           script: |
             adb install -r maestro/app/notepad-free.apk
             $HOME/.maestro/bin/maestro test \
