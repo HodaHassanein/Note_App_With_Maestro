@@ -72,18 +72,7 @@ jobs:
             FLOWS_DIR="$GITHUB_WORKSPACE/maestro/flows"
 
             set +e
-            $HOME/.maestro/bin/maestro test \
-              -e F01_NOTE_TITLE="Note Alpha" \
-              -e F01_NOTE_BODY="body alpha" \
-              -e F02_NOTE_TITLE="Note Beta" \
-              -e F02_UNDO_FULL="Hello World" \
-              -e F03_NEW_TITLE="Note Gamma" \
-              -e F03_NEW_BODY="body gamma" \
-              -e F06_COLOR_SWATCH="48%,52%" \
-              -e F07_EXPORT_MARKER="export body" \
-              --format junit \
-              --output "$OUTPUT_XML" \
-              "$FLOWS_DIR"
+            $HOME/.maestro/bin/maestro test -e F01_NOTE_TITLE="Note Alpha" -e F01_NOTE_BODY="body alpha" -e F02_NOTE_TITLE="Note Beta" -e F02_UNDO_FULL="Hello World" -e F03_NEW_TITLE="Note Gamma" -e F03_NEW_BODY="body gamma" -e F06_COLOR_SWATCH="48%,52%" -e F07_EXPORT_MARKER="export body" --format junit --output "$OUTPUT_XML" "$FLOWS_DIR"
             MAESTRO_EXIT=$?
             set -e
 
