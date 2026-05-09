@@ -65,8 +65,13 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 300
           script: |
-            adb install -r $GITHUB_WORKSPACE/maestro/app/notepad-free.apk
+            set -e
+            adb install -r "$GITHUB_WORKSPACE/maestro/app/notepad-free.apk"
 
+            OUTPUT_XML="$GITHUB_WORKSPACE/maestro-results.xml"
+            FLOWS_DIR="$GITHUB_WORKSPACE/maestro/flows"
+
+            set +e
             $HOME/.maestro/bin/maestro test \
               -e F01_NOTE_TITLE="Note Alpha" \
               -e F01_NOTE_BODY="body alpha" \
@@ -76,19 +81,25 @@ jobs:
               -e F03_NEW_BODY="body gamma" \
               -e F06_COLOR_SWATCH="48%,52%" \
               -e F07_EXPORT_MARKER="export body" \
-              $GITHUB_WORKSPACE/maestro/flows \
               --format junit \
-              --output $GITHUB_WORKSPACE/maestro-results.xml \
-            && echo "MAESTRO_STATUS=passed" >> $GITHUB_ENV \
-            || echo "MAESTRO_STATUS=failed" >> $GITHUB_ENV
+              --output "$OUTPUT_XML" \
+              "$FLOWS_DIR"
+            MAESTRO_EXIT=$?
+            set -e
 
-            # Build simple report.txt
-            PASSED=$(grep -c 'testcase' $GITHUB_WORKSPACE/maestro-results.xml 2>/dev/null || echo 0)
-            FAILED=$(grep -c '<failure' $GITHUB_WORKSPACE/maestro-results.xml 2>/dev/null || echo 0)
-            TOTAL=$((PASSED))
-            STATUS=${MAESTRO_STATUS:-unknown}
-            mkdir -p $GITHUB_WORKSPACE/reports/latest
-            cat > $GITHUB_WORKSPACE/reports/latest/report.txt <<EOF
+            if [ $MAESTRO_EXIT -eq 0 ]; then
+              echo "MAESTRO_STATUS=passed" >> $GITHUB_ENV
+              STATUS="passed"
+            else
+              echo "MAESTRO_STATUS=failed" >> $GITHUB_ENV
+              STATUS="failed"
+            fi
+
+            PASSED=$(grep -c '<testcase' "$OUTPUT_XML" 2>/dev/null || echo 0)
+            FAILED=$(grep -c '<failure' "$OUTPUT_XML" 2>/dev/null || echo 0)
+
+            mkdir -p "$GITHUB_WORKSPACE/reports/latest"
+            cat > "$GITHUB_WORKSPACE/reports/latest/report.txt" << REPORT
             Last Maestro run (CI)
             =====================
             Time    : $(date '+%Y-%m-%d %H:%M:%S UTC')
@@ -96,14 +107,12 @@ jobs:
             Trigger : $GITHUB_EVENT_NAME
             Commit  : $GITHUB_SHA
             Status  : $STATUS
-            Total   : $TOTAL  Failed: $FAILED
+            Total   : $PASSED  Failed: $FAILED
+            Run     : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+            REPORT
 
-            Run link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
-            EOF
-
-            # Copy Maestro screenshots/artifacts if any
             if [ -d "$HOME/.maestro/tests" ]; then
-              cp -r "$HOME/.maestro/tests" $GITHUB_WORKSPACE/reports/latest/maestro-artifacts 2>/dev/null || true
+              cp -r "$HOME/.maestro/tests" "$GITHUB_WORKSPACE/reports/latest/maestro-artifacts" || true
             fi
 
       - name: Upload report and artifacts
