@@ -1,12 +1,11 @@
 name: Maestro Tests
 
-# push on master, any PR, daily at 6:00 AM Cairo (UTC+3 = 03:00 UTC)
 on:
   push:
     branches: [ master ]
   pull_request:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 4 * * *'
 
 jobs:
   maestro:
@@ -17,7 +16,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Enable KVM (hardware acceleration for emulator)
+      - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
@@ -41,7 +40,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-34-x86_64-${{ runner.os }}
+          key: avd-34-x86_64-${{ runner.os }}-${{ hashFiles('**/*.yml') }}
 
       - name: Create AVD (if not cached)
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -50,7 +49,7 @@ jobs:
           api-level: 34
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -memory 2048
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save -memory 2048
           disable-animations: true
           emulator-boot-timeout: 300
           script: echo "AVD created"
@@ -61,48 +60,10 @@ jobs:
           api-level: 34
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -memory 2048
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save -memory 2048
           disable-animations: true
           emulator-boot-timeout: 300
-          script: |
-            set -e
-            adb install -r "$GITHUB_WORKSPACE/maestro/app/notepad-free.apk"
-
-            OUTPUT_XML="$GITHUB_WORKSPACE/maestro-results.xml"
-            FLOWS_DIR="$GITHUB_WORKSPACE/maestro/flows"
-
-            set +e
-            $HOME/.maestro/bin/maestro test -e F01_NOTE_TITLE="Note Alpha" -e F01_NOTE_BODY="body alpha" -e F02_NOTE_TITLE="Note Beta" -e F02_UNDO_FULL="Hello World" -e F03_NEW_TITLE="Note Gamma" -e F03_NEW_BODY="body gamma" -e F06_COLOR_SWATCH="48%,52%" -e F07_EXPORT_MARKER="export body" --format junit --output "$OUTPUT_XML" "$FLOWS_DIR"
-            MAESTRO_EXIT=$?
-            set -e
-
-            if [ $MAESTRO_EXIT -eq 0 ]; then
-              echo "MAESTRO_STATUS=passed" >> $GITHUB_ENV
-              STATUS="passed"
-            else
-              echo "MAESTRO_STATUS=failed" >> $GITHUB_ENV
-              STATUS="failed"
-            fi
-
-            PASSED=$(grep -c '<testcase' "$OUTPUT_XML" 2>/dev/null || echo 0)
-            FAILED=$(grep -c '<failure' "$OUTPUT_XML" 2>/dev/null || echo 0)
-
-            mkdir -p "$GITHUB_WORKSPACE/reports/latest"
-            cat > "$GITHUB_WORKSPACE/reports/latest/report.txt" << REPORT
-            Last Maestro run (CI)
-            =====================
-            Time    : $(date '+%Y-%m-%d %H:%M:%S UTC')
-            Branch  : $GITHUB_REF_NAME
-            Trigger : $GITHUB_EVENT_NAME
-            Commit  : $GITHUB_SHA
-            Status  : $STATUS
-            Total   : $PASSED  Failed: $FAILED
-            Run     : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
-            REPORT
-
-            if [ -d "$HOME/.maestro/tests" ]; then
-              cp -r "$HOME/.maestro/tests" "$GITHUB_WORKSPACE/reports/latest/maestro-artifacts" || true
-            fi
+          script: bash $GITHUB_WORKSPACE/maestro/ci/run-tests.sh
 
       - name: Upload report and artifacts
         if: always()
@@ -115,7 +76,7 @@ jobs:
           retention-days: 7
 
       - name: Notify - PASSED
-        if: always() && env.MAESTRO_STATUS == 'passed'
+        if: always() && env.MAESTRO_STATUS == 'passed' && github.event_name != 'pull_request' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && env.MAESTRO_STATUS == 'passed')
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -136,7 +97,7 @@ jobs:
             Report  : Download "maestro-report" artifact from the Run link above.
 
       - name: Notify - FAILED
-        if: always() && env.MAESTRO_STATUS == 'failed'
+        if: always() && env.MAESTRO_STATUS == 'failed' && github.event_name != 'pull_request' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && env.MAESTRO_STATUS == 'failed')
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -156,6 +117,6 @@ jobs:
             Run     : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
             Open the Run link -> download "maestro-report" artifact:
-            - report.txt       : simple pass/fail summary
+            - report.txt          : simple pass/fail summary
             - maestro-results.xml : full JUnit results
             - maestro-artifacts/  : screenshots for failed flows
