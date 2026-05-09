@@ -3,10 +3,10 @@ name: Maestro Cloud Tests
 # Triggers: every push on main, every PR on any branch, daily at 6:00 AM Cairo (UTC+3 = 03:00 UTC)
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 4 * * *'
 
 jobs:
   maestro-cloud:
