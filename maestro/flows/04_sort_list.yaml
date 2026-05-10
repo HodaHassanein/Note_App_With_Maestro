@@ -7,12 +7,28 @@ appId: com.atomczak.notepat
     visible:
       id: new_note_fab
     timeout: 5000
-- tapOn: "SORT"
+- tapOn:
+    id: action_sort
+    optional: true
+- tapOn:
+    text: "More options"
+    optional: true
+- tapOn:
+    text: "SORT"
+    optional: true
 - extendedWaitUntil:
     visible: "Sort by"
     timeout: 5000
 - tapOn: "title: A to Z"
-- tapOn: "SORT"
+- tapOn:
+    id: action_sort
+    optional: true
+- tapOn:
+    text: "More options"
+    optional: true
+- tapOn:
+    text: "SORT"
+    optional: true
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
