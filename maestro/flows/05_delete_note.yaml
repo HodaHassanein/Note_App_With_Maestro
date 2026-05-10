@@ -34,3 +34,5 @@ env:
 - tapOn:
     text: "Trash"
 - assertVisible: ${F02_NOTE_TITLE}
+
+#Screen size may different based on the emulater or device used. so we adding the optional flag in our test.
