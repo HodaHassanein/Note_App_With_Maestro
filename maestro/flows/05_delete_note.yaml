@@ -12,6 +12,9 @@ env:
 - longPressOn:
     text: ${F02_NOTE_TITLE}
 - tapOn:
+    text: "More options"
+    optional: true
+- tapOn:
     text: "Delete"
 - extendedWaitUntil:
     visible: "Delete the selected notes?"
