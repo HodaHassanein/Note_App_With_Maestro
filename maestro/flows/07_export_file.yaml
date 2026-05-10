@@ -8,13 +8,13 @@ env:
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - tapOn:
     id: new_note_fab
 - extendedWaitUntil:
     visible:
       id: action_save_note
-    timeout: 100
+    timeout: 5000
 - tapOn:
     id: textNoteTitleEdit
 - inputText: "Export note"
@@ -28,7 +28,7 @@ env:
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - longPressOn:
     text: "Export note"
 - tapOn: "More options"

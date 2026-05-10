@@ -8,7 +8,7 @@ env:
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - tapOn: "More options"
 - tapOn: ".*Select all notes.*"
 - tapOn: "More options"
@@ -21,4 +21,4 @@ env:
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000

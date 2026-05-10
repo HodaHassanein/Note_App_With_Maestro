@@ -10,13 +10,13 @@ env:
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - tapOn:
     text: ${F01_NOTE_TITLE}
 - extendedWaitUntil:
     visible:
       id: action_save_note
-    timeout: 100
+    timeout: 5000
 - tapOn:
     id: textNoteTitleEdit
 - eraseText
@@ -32,6 +32,6 @@ env:
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - assertVisible: ${F03_NEW_TITLE}
 - assertNotVisible: ${F01_NOTE_TITLE}

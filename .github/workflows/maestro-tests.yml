@@ -1,45 +1,82 @@
-name: Maestro Cloud Tests
+name: Maestro Tests
 
-# Triggers: every push on main, every PR on any branch, daily at 6:00 AM Cairo (UTC+3 = 03:00 UTC)
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 4 * * *'
 
 jobs:
-  maestro-cloud:
-    name: Run Maestro flows on Maestro Cloud
+  maestro:
+    name: Run Maestro flows on Android emulator
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Upload APK and run flows on Maestro Cloud
-        id: maestro
-        uses: mobile-dev-inc/action-maestro-cloud@v2.0.2
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          api-key:    ${{ secrets.MAESTRO_API_KEY }}
-          project-id: ${{ secrets.MAESTRO_PROJECT_ID }}
-          # TODO: put your APK under maestro/app/ and update this path
-          app-file:   maestro/app/notepad-free.apk
-          workspace:  maestro/flows
-          name:       "${{ github.event_name }} - ${{ github.ref_name }} - ${{ github.sha }}"
-          timeout:    30
-          env: |
-            F01_NOTE_TITLE=Note Alpha
-            F01_NOTE_BODY=body alpha
-            F02_NOTE_TITLE=Note Beta
-            F02_UNDO_FULL=Hello World
-            F03_NEW_TITLE=Note Gamma
-            F03_NEW_BODY=body gamma
-            F06_COLOR_SWATCH=48%,52%
-            F07_EXPORT_MARKER=export body
+          java-version: 17
+          distribution: temurin
+
+      - name: Install Maestro CLI
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Cache AVD snapshot
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-34-x86_64-${{ runner.os }}-${{ hashFiles('**/*.yml') }}
+
+      - name: Create AVD (if not cached)
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save -memory 2048
+          disable-animations: true
+          emulator-boot-timeout: 300
+          script: echo "AVD created"
+
+      - name: Run Maestro tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save -memory 2048
+          disable-animations: true
+          emulator-boot-timeout: 300
+          script: bash $GITHUB_WORKSPACE/maestro/ci/run-tests.sh
+
+      - name: Upload report and artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-report
+          path: |
+            ${{ github.workspace }}/reports/latest/
+            ${{ github.workspace }}/maestro-results.xml
+          retention-days: 7
 
       - name: Notify - PASSED
-        if: success()
+        if: always() && env.MAESTRO_STATUS == 'passed' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -57,10 +94,10 @@ jobs:
             Trigger : ${{ github.event_name }}
             Commit  : ${{ github.sha }}
             Run     : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Cloud   : ${{ steps.maestro.outputs.MAESTRO_CLOUD_CONSOLE_URL }}
+            Report  : Download "maestro-report" artifact from the Run link above.
 
       - name: Notify - FAILED
-        if: failure()
+        if: always() && env.MAESTRO_STATUS == 'failed' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -78,6 +115,8 @@ jobs:
             Trigger : ${{ github.event_name }}
             Commit  : ${{ github.sha }}
             Run     : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Cloud   : ${{ steps.maestro.outputs.MAESTRO_CLOUD_CONSOLE_URL }}
 
-            Open the links above to see which flows failed and the screenshots.
+            Open the Run link -> download "maestro-report" artifact:
+            - report.txt          : simple pass/fail summary
+            - maestro-results.xml : full JUnit results
+            - maestro-artifacts/  : screenshots for failed flows

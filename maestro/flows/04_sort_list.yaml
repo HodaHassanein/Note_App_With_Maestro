@@ -6,18 +6,18 @@ appId: com.atomczak.notepat
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - tapOn: "SORT"
 - extendedWaitUntil:
     visible: "Sort by"
-    timeout: 100
+    timeout: 5000
 - tapOn: "title: A to Z"
 - tapOn: "SORT"
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - assertNotVisible: "Sort by"
 - extendedWaitUntil:
     visible: "Note Gamma"

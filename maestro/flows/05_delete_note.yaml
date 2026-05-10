@@ -8,19 +8,19 @@ env:
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - longPressOn:
     text: ${F02_NOTE_TITLE}
 - tapOn:
     text: "Delete"
 - extendedWaitUntil:
     visible: "Delete the selected notes?"
-    timeout: 100
+    timeout: 5000
 - tapOn: "OK"
 - extendedWaitUntil:
     visible:
       id: new_note_fab
-    timeout: 100
+    timeout: 5000
 - assertNotVisible: ${F02_NOTE_TITLE}
 - tapOn:
     text: "Open navigation drawer"
