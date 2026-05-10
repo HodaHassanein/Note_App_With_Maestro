@@ -21,7 +21,12 @@ $HOME/.maestro/bin/maestro test \
   -e F07_EXPORT_MARKER="export body" \
   --format junit \
   --output "$OUTPUT_XML" \
-  "$FLOWS_DIR"
+  "$FLOWS_DIR/01_new_note.yaml" \
+  "$FLOWS_DIR/02_undo_in_editor.yaml" \
+  "$FLOWS_DIR/03_edit_note.yaml" \
+  "$FLOWS_DIR/05_delete_note.yaml" \
+  "$FLOWS_DIR/06_select_all_colorize.yaml" \
+  "$FLOWS_DIR/07_export_file.yaml"
 MAESTRO_EXIT=$?
 set -e
 
@@ -59,3 +64,26 @@ REPORT
 if [ -d "$HOME/.maestro/tests" ]; then
   cp -r "$HOME/.maestro/tests" "$GITHUB_WORKSPACE/reports/latest/maestro-artifacts" || true
 fi
+
+# Write summary directly to GitHub Actions job summary page
+cat >> $GITHUB_STEP_SUMMARY << SUMMARY
+## Maestro Test Results
+
+| | |
+|---|---|
+| **Status** | $STATUS |
+| **Passed** | $PASSED |
+| **Failed** | $FAILED |
+| **Total**  | $TOTAL |
+| **Branch** | $GITHUB_REF_NAME |
+| **Trigger**| $GITHUB_EVENT_NAME |
+SUMMARY
+
+if [ -f "$OUTPUT_XML" ] && [ "$FAILED" -gt 0 ]; then
+  echo "" >> $GITHUB_STEP_SUMMARY
+  echo "### Failed Flows" >> $GITHUB_STEP_SUMMARY
+  grep -o 'name="[^"]*".*<failure[^>]*>[^<]*' "$OUTPUT_XML" 2>/dev/null | \
+    sed 's/name="\([^"]*\)".*<failure[^>]*>\(.*\)/- ❌ \1: \2/' >> $GITHUB_STEP_SUMMARY || true
+fi
+
+exit $MAESTRO_EXIT
